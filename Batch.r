@@ -1,3 +1,5 @@
+#batch descendent algorithm#
+
 batch <- function(dataset, theta, alpha){
 	return(theta + alpha * colSums(cbind(1,dataset[1:12]) * (dataset[,13] - colSums(t(cbind(1,dataset[1:12]))*theta))))
 }
@@ -6,7 +8,7 @@ batch <- function(dataset, theta, alpha){
 
 Lineal <- function(dataset, theta, alpha){
 	Data <- cbind(1,dataset[1:12]) 
-	for(i in 1:length(Data)){
+	for(i in 1:length(Data)[,1]){
 		theta <- theta + alpha * (Data[i,] *(dataset[,13] - sum(data[i,] *theta))
 	}
 	return(theta)
@@ -14,7 +16,7 @@ Lineal <- function(dataset, theta, alpha){
 
 
  prediction <- function(data, beta){
- 	return(sum(cbind(1,data[1:12]) * beta))
+ 	return(colSums(t(cbind(1,data[1:12])) * beta))
  }
 
 standardization <- function(dataset){

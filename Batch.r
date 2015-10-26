@@ -28,3 +28,16 @@ standardization <- function(dataset){
 	
 	return(data)
 }
+
+normalization <-function(dataset){
+	data <- dataset
+
+	for(i in 1:length(dataset[,1])) {
+		for(k in 1:length(dataset[1,])) { 
+			data[i,k] <- ( dataset[i,k] - mean(dataset[,k]) ) / ( sd(dataset[,k]))
+		}
+	}
+	
+	return(data)
+
+}

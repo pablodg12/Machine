@@ -14,9 +14,18 @@ Lineal <- function(dataset, theta, alpha){
 	return(theta)
 }
 
+crossfolder <- function(dataset, partition){
+	last = 1
+	for(i in 1:partition){
+		filename = paste("cross", i, ".data" , sep="")
+		write.table(dataset[ last : (length(dataset[,1]) * (i/partition)), 1:13], filename, row.names = FALSE, col.names = FALSE)
+		last = (length(dataset) * (i/partition))
+	}
+}
 
  prediction <- function(data, beta){
- 	return(colSums(t(cbind(1,data[1:12])) * beta))
+ 	print(colSums(t(cbind(1,data[1:12])) * beta))
+ 	return((data[,13] - colSums(t(cbind(1,data[1:12])) * beta))^2)
  }
 
 standardization <- function(dataset){
@@ -27,7 +36,6 @@ standardization <- function(dataset){
 			data[i,k] <- ( dataset[i,k] - min(dataset[,k]) ) / ( max(dataset[,k]) - min(dataset[,k]) )
 		}
 	}
-	
 	return(data)
 }
 

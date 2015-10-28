@@ -1,4 +1,4 @@
-######### Algoritmos Pregunta 1 Tarea #################
+######### Tarea de Machine Learning #################
 
 Batch <- function(dataset, beta, alpha){
 	delta <- t(cbind(1,as.matrix(dataset[1:12]))) %*% (dataset[,13] - (cbind(1,as.matrix(dataset[1:12])) %*% beta)) 
@@ -12,19 +12,33 @@ Stochastic  <- function(dataset, theta, alpha){
 	}
 	return(theta)
 }
-Ascent <- function(dataset, beta, alpha){
-	Data <- cbind(1,dataset[1:12]) 
-	for(i in 1:length(Data[1,])) {
-		theta <- theta + alpha * ( Data[i,] * (dataset[i,13] - 1/(1 + e ^(-sum(Data[i,] * theta))) ))
-	}
-	return(theta)
-}
 
 Locally <- function(dataset, bandwidth){ 
-	return(((solve((t(cbind(1,as.matrix(dataset[1:12]))) %*% weight(dataset, bandwidth )) %*% cbind(1,as.matrix(dataset[1:12]))) %*% t(cbind(1,as.matrix(dataset[1:12])))) %*% weight(dataset, bandwidth)) %*% dataset[,13])
+	return(((solve( (t(cbind(1,as.matrix(dataset[1:12]))) %*% weightLocally(dataset, bandwidth )) %*% cbind(1,as.matrix(dataset[1:12]))) %*% t(cbind(1,as.matrix(dataset[1:12])))) %*% weightLocally(dataset, bandwidth)) %*% dataset[,13])
+}
+#revisar#
+Ascent <- function(dataset, beta, alpha){
+	for(i in 1:length(dataset[1,])) {
+		beta <- beta + alpha * ( cbind(1,dataset[1:6])[i,] * (dataset[i,7] - logistic(sum(cbind(1,dataset[1:6])[i,] * beta)) ))
+	}
+	return(beta)
 }
 
-weight <- function(dataset, bandwidth){ ### Calcula los pesos
+NewtonRaphson <-function(dataset, beta){
+	return(beta + ( solve( t(cbind(1,as.matrix(dataset[1:(length(dataset) - 1 )]))) %*% weightNewton(dataset, beta) %*% cbind(1,as.matrix(dataset[1:(length(dataset)-1) ]))) %*% t(cbind(1,as.matrix(dataset[1:(length(dataset)-1)]))) %*% ( dataset[,length(dataset)] * logistic((cbind(1,as.matrix(dataset[1:(length(dataset) - 1 )]))) %*% beta )) ) )
+
+}
+
+weightNewton <- function(dataset, beta){
+	Data <- cbind(1,dataset[1:(length(dataset)-1)])
+	weight <- c()
+	for(i in 1:length( Data[,1] )) {
+		weight[i] <-  logistic(sum(Data[i,] * beta)) * (1 - logistic(sum(Data[i,] * beta)))
+	}
+	return(diag(weight, length(weight), length(weight)))	
+}
+
+weightLocally <- function(dataset, bandwidth){ ### Calcula los pesos
 	Data <- cbind(1,dataset[1:12])
 	weight <- c()
 	for(i in 1:length( Data[,1] )) {
@@ -33,6 +47,9 @@ weight <- function(dataset, bandwidth){ ### Calcula los pesos
 	return(diag(weight, length(weight), length(weight)))	
 }
 
+logistic <- function(number){
+	return(exp(number)/(1+exp(number)))
+}
 
 
 

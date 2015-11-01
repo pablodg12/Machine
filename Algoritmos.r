@@ -7,7 +7,7 @@ Batch <- function(dataset, beta, alpha){
 
 Stochastic  <- function(dataset, theta, alpha){
 	Data <- cbind(1,dataset[1:12]) 
-	for(i in 1:length(Data[1,])) {
+	for(i in 1:length(Data[,1])) {
 		theta <- theta + alpha * ( Data[i,] * (dataset[i,13] - sum(Data[i,] * theta) ))
 	}
 	return(theta)
@@ -26,8 +26,8 @@ Ascent <- function(dataset, beta, alpha){
 
 NewtonRaphson <-function(dataset, beta){
 
-	adjust <- dataset[,length(dataset)] - logistic( (cbind(1,as.matrix(dataset[1:(length(dataset) - 1 )]))) %*% beta )
-	return(beta + ( solve( t(cbind(1,as.matrix(dataset[1:(length(dataset) - 1 )]))) %*% weightNewton(dataset, beta) %*% cbind(1,as.matrix(dataset[1:(length(dataset)-1) ]))) %*% t(cbind(1,as.matrix(dataset[1:(length(dataset)-1)])))) %*% adjust)
+	adjust <- dataset[,13] - logistic( (cbind(1,as.matrix(dataset[1:12])) %*% beta ))
+	return(beta + ( ginv( t(cbind(1,as.matrix(dataset[1:12]))) %*% weightNewton(dataset, beta) %*% cbind(1,as.matrix(dataset[1:12])), tol = sqrt(.Machine$double.eps)) %*% t(cbind(1,as.matrix(dataset[1:12]))) %*% adjust))
 
 }
 

@@ -1,32 +1,26 @@
-standardization <- function(dataset){
+normalization <- function(dataset){
 	data <- dataset
 
 	for(i in 1:length(dataset[,1])) {
 		for(k in 1:length(dataset[1,])) { 
-			data[i,k] <- 2 * (( dataset[i,k] - min(dataset[,k]) ) / ( max(dataset[,k]) - min(dataset[,k]) ))  -1
+			data[i,k] <-(( dataset[i,k] - min(dataset[,k]) ) / ( max(dataset[,k]) - min(dataset[,k]) )) 
 		}
 	}
 	return(data)
 }
 
-Specialstandardization <- function(dataset, dataset2){
+Specialnormalization <- function(dataset, dataset2){
 	data <- dataset2
 	for(i in 1:length(dataset2[,1])) {
 		for(k in 1:length(dataset2[1,])) { 
-			data[i,k] <-  (2* ( data[i,k] - min(dataset[,k]) ) / ( max(dataset[,k]) - min(dataset[,k]) )) - 1
+			data[i,k] <-  ( data[i,k] - min(dataset[,k]) ) / ( max(dataset[,k]) - min(dataset[,k]) ) 
 		}
 	}
 	return(data)
 }
 
-DeStandar <- function(data, dataset){
-	for(i in 1:length(data[,1])) {
-		data[i,1] <-  ((data[i,1] -1 ) * ( (max(dataset[,k]) - min(dataset[,k]))/ 2) + min(dataset) ) 
-	}
-	return(data)
-}
 
-normalization <-function(dataset){
+standardization <-function(dataset){
 	data <- dataset
 	for(i in 1:length(dataset[,1])) {
 		for(k in 1:length(dataset[1,])) { 
@@ -37,7 +31,7 @@ normalization <-function(dataset){
 	return(data)
 }
 
-Specialnormalization <- function(dataset, dataset2){
+Specialstandardization <- function(dataset, dataset2){
 	data <- dataset2
 	for(i in 1:length(dataset2[,1])) {
 		for(k in 1:length(dataset2[1,])) { 
@@ -45,13 +39,6 @@ Specialnormalization <- function(dataset, dataset2){
 		}
 	}
 	
-	return(data)
-}
-
-DeNormalization <- function(data, dataset){
-	for(i in 1:length(data[,1])) {
-		data[i,1] <-  (data[i,1] * (sd(dataset)) + mean(dataset)) 
-	}
 	return(data)
 }
 
@@ -82,9 +69,21 @@ TrainBatch <- function(data, beta, alpha){
 	return(beta)
 }
 
-TrainRaphson <- function(data, beta, iteration, alpha){
+trainAscent <- function(data, beta, alpha){
+	betab <- c(5,5,5,5,5,5,5,5,5,5,5,5,5)
+	repeat{
+		beta <- Ascent(data, beta, alpha)
+		if( (abs( sum(t(betab)) - sum(t(beta)) )  < 0.05) ) {
+			break
+		}
+		betab <- beta
+	}
+	return(beta)
+}
+
+TrainRaphson <- function(data, beta, iteration){
     for(i in 1:iteration){
-    	beta <- NewtonRaphson(data, beta, alpha)
+    	beta <- LogisticNewtonRaphson(data, beta)
     }
     return(beta)
 }
@@ -93,7 +92,7 @@ TrainStocha <- function(data, beta, alpha){
 	betab <- c(5,5,5,5,5,5,5,5,5,5,5,5,5)
 	repeat{
 		beta <- Stochastic(data, beta, alpha)
-		if( (abs( sum(t(betab)) - sum(t(beta)) )  < 0.01) ) {
+		if( (abs( sum(t(betab)) - sum(t(beta)) )  < 0.05) ) {
 			break
 		}
 		betab <- beta
@@ -105,12 +104,47 @@ Error <- function(data, beta){
 	return( (data[,13] - cbind(1,as.matrix(data[1:12])) %*% beta )^2 )
 }
 
-ErrorN <- function(data, dataset2, beta){
-	return( (data[,13] - DeNormalization((cbind(1,as.matrix(Specialnormalization(dataset2, data[1:12]))) %*% beta), dataset2[,13]) )^2 )
+Errorate <- function(data, beta){
+
+	numbers <- cbind(1,as.matrix(data[1:6])) %*% beta
+	numbers <- numbers > 0
+	target  <- data[,7] >0
+	numbers <- numbers == target
+	contador = 0
+	for(i in 1:length(numbers[,1])) {
+		if( numbers[i,1] == TRUE){
+			contador = contador +1
+		}
+	}
+	return(1 - (contador/length(numbers[,1])))
 }
 
-ErrorS <- function(data, dataset2, beta){
-	return( (data[,13] - DeStandar((cbind(1,as.matrix(Specialstandardization(dataset2, data[1:12]))) %*% beta),dataset2[,13]) )^2  ) 
+
+ErrorN <- function(test, train, beta){
+	acumulacion<- c()
+	evaluation <- cbind(1,Specialnormalization(train,test[1:12]))
+	for(i in 1:length(test[,1])){
+		acumulacion[i] <- (test[i,13] - DeNormalization(sum(evaluation[i,]*beta),train[,13]))^2
+	}
+	return(acumulacion)
 }
 
+ErrorS <- function(test, train, beta){ 
+	acumulacion<- c()
+	evaluation <- cbind(1,Specialstandardization(train,test[1:12]))
+	for(i in 1:length(test[,1])){
+		acumulacion[i] <- ( test[i,13] - DeStandar(sum(evaluation[i,]*beta),train[,13]) )^2
+	}
+	return(acumulacion)
+}
+
+DeNormalization <- function(dato, dataset){
+		dato <-  ((dato) * ( (max(dataset) - min(dataset)))) + min(dataset)   
+	return(dato)
+}
+
+DeStandar <- function(dato, dataset){
+		dato <-  dato * (sd(dataset)) + mean(dataset) 
+	return(dato)
+}
 

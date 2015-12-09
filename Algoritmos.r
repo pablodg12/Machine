@@ -58,7 +58,7 @@ weightLocally <- function(dataset, target, bandwidth){ ### Calcula los pesos
 }
 
 logistic <- function(number){
-	return(exp(number)/(1+exp(number)))
+	return(1/(1+exp(-number)))
 }
 
 
